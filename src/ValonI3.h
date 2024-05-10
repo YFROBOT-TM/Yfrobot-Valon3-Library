@@ -12,10 +12,11 @@ the input value of pins, LED driver utilities.
 Distributed as-is; no warranty is given.
 ******************************************************************************/
 
-#include "Arduino.h"
+#include <Arduino.h>
+#include <Wire.h>
 
-#ifndef SX1508_H
-#define SX1508_H
+#ifndef ValonI3_SX1508_H
+#define ValonI3_SX1508_H
 
 #ifndef I2C_ERROR_OK
 #define I2C_ERROR_OK 0
@@ -87,37 +88,39 @@ Distributed as-is; no warranty is given.
 #define   REG_TEST_1        0x7E  //  RegTest1 Test register 0000 0000
 #define   REG_TEST_2        0x7F  //  RegTest2 Test register 0000 0000
 
+#define VALON_SX1508_ADDRESS  0x20  // SX1508 I2C address
 
-class SX1508
-{
+class ValonI3 {
 private: 
-
-  byte REG_I_ON[8] = {REG_I_ON_0, REG_I_ON_1, REG_I_ON_2, REG_I_ON_3,
+    byte REG_I_ON[8] = {REG_I_ON_0, REG_I_ON_1, REG_I_ON_2, REG_I_ON_3,
             REG_I_ON_4, REG_I_ON_5, REG_I_ON_6, REG_I_ON_7};
             
-  byte REG_T_ON[8] = {0xFF, 0xFF, REG_T_ON_2, REG_T_ON_3,
+    byte REG_T_ON[8] = {0xFF, 0xFF, REG_T_ON_2, REG_T_ON_3,
             0xFF, 0xFF, REG_T_ON_6, REG_T_ON_7};
             
-  byte REG_OFF[8] = {0xFF, 0xFF, REG_OFF_2, REG_OFF_3,
+    byte REG_OFF[8] = {0xFF, 0xFF, REG_OFF_2, REG_OFF_3,
             0xFF, 0xFF, REG_OFF_6, REG_OFF_7};
   
-  byte REG_T_RISE[8] = {0xFF, 0xFF, 0xFF, REG_T_RISE_3,
+    byte REG_T_RISE[8] = {0xFF, 0xFF, 0xFF, REG_T_RISE_3,
             0xFF, 0xFF, 0xFF,REG_T_RISE_7};
             
-  byte REG_T_FALL[8] = {0xFF, 0xFF, 0xFF, REG_T_FALL_3,
+    byte REG_T_FALL[8] = {0xFF, 0xFF, 0xFF, REG_T_FALL_3,
             0xFF, 0xFF, 0xFF, REG_T_FALL_7};
           
-// These private functions are not available to Arduino sketches.
-		 // If you need to read or write directly to registers, consider
-		 // putting the writeByte, readByte functions in the public section
+    // These private functions are not available to Arduino sketches.
+	// If you need to read or write directly to registers, consider putting the writeByte, readByte functions in the public section
 	TwoWire *_i2cPort;
-	uint8_t deviceAddress; // I2C Address of SX1508
-						   // Pin definitions:
+    
+	uint8_t deviceAddress; // I2C Address of ValonI3
+	
+    // Pin definitions:
 	uint8_t pinInterrupt;
 	uint8_t pinOscillator;
 	uint8_t pinReset;
+
 	// Misc variables:
 	unsigned long _clkX;
+
 	// Read Functions:
 	uint8_t readByte(uint8_t registerAddress);
 
@@ -139,16 +142,16 @@ private:
 
 public:
 	// -----------------------------------------------------------------------------
-	// Constructor - SX1508: This function sets up the pins connected to the
-	//		SX1508, and sets up the private deviceAddress variable.
+	// Constructor - ValonI3: This function sets up the pins connected to the
+	//		ValonI3, and sets up the private deviceAddress variable.
 	// -----------------------------------------------------------------------------
-	SX1508();
+	ValonI3();
 	// Legacy below. Use 0-parameter constructor, and set these parameters in the
 	// begin function:
-	SX1508(uint8_t address, uint8_t resetPin = 255, uint8_t interruptPin = 255, uint8_t oscillatorPin = 255);
+	ValonI3(uint8_t address, uint8_t resetPin = 255, uint8_t interruptPin = 255, uint8_t oscillatorPin = 255);
 
 	// -----------------------------------------------------------------------------
-	// begin(uint8_t address, uint8_t resetPin): This function initializes the SX1508.
+	// begin(uint8_t address, uint8_t resetPin): This function initializes the ValonI3.
 	//  	It requires wire to already be begun (previous versions did not do this), resets the IC, and tries to read some
 	//  	registers to prove it's connected.
 	// Inputs:
@@ -444,4 +447,4 @@ public:
 	void clock(uint8_t oscSource = 2, uint8_t oscDivider = 1, uint8_t oscPinFunction = 0, uint8_t oscFreqOut = 0);
 };
 
-#endif // SX1508_library_H
+#endif // ValonI3_SX1508_library_H
