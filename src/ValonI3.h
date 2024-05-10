@@ -1,22 +1,14 @@
 /******************************************************************************
-sx1508.cpp
-sx1508 I/O Expander Library Source File
+ ValonI3 sx1508 I/O Expander Library Source File and oled library Source File
 Creation Date: 01-18-2022
 @ YFROBOT
-
-Here you'll find the Arduino code used to interface with the SX1508 I2C
-8 I/O expander. There are functions to take advantage of everything the
-SX1508 provides - input/output setting, writing pins high/low, reading 
-the input value of pins, LED driver utilities.
-
-Distributed as-is; no warranty is given.
 ******************************************************************************/
 
 #include <Arduino.h>
 #include <Wire.h>
 
-#ifndef ValonI3_SX1508_H
-#define ValonI3_SX1508_H
+#ifndef ValonI3_H
+#define ValonI3_H
 
 #ifndef I2C_ERROR_OK
 #define I2C_ERROR_OK 0
@@ -88,13 +80,13 @@ Distributed as-is; no warranty is given.
 #define   REG_TEST_1        0x7E  //  RegTest1 Test register 0000 0000
 #define   REG_TEST_2        0x7F  //  RegTest2 Test register 0000 0000
 
-#define VALON_SX1508_ADDRESS  0x20  // SX1508 I2C address
-
+#define VALONI3_ADDRESS  0x20  // SX1508 I2C address
+// VALON I3 MOTOR PIN 
 #define MLPinA 0
 #define MLPinB 1
 #define MRPinA 2
 #define MRPinB 3
-
+// VALON I3 MOTOR PIN 
 #define BarrierL 4
 #define BarrierR 5
 #define BarrierEN 7
@@ -456,8 +448,9 @@ public:
 	void clock(uint8_t oscSource = 2, uint8_t oscDivider = 1, uint8_t oscPinFunction = 0, uint8_t oscFreqOut = 0);
     
     void setMotor(int mLSpeed, int mRSpeed); // 驱动电机
-    void EnBarrier(int en);  // 使能障碍物检测
+    void EnBarrier();  // 使能障碍物检测
+    void DisBarrier();  // 禁用障碍物检测
     int readBarrier(int pin);
 };
 
-#endif // ValonI3_SX1508_library_H
+#endif // ValonI3_library_H

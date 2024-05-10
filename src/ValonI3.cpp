@@ -1,15 +1,8 @@
 /******************************************************************************
   ValonI3.cpp
-  ValonI3 sx1508 I/O Expander Library Source File
+  ValonI3 sx1508 I/O Expander Library Source File and oled driver Library Source File
   Creation Date: 01-18-2022
   @ YFROBOT
-
-  Here you'll find the Arduino code used to interface with the SX1508 I2C
-  8 I/O expander. There are functions to take advantage of everything the
-  SX1508 provides - input/output setting, writing pins high/low, reading
-  the input value of pins, LED driver utilities.
-
-  Distributed as-is; no warranty is given.
 ******************************************************************************/
 
 #include <Arduino.h>
@@ -62,7 +55,7 @@ uint8_t ValonI3::init(void)
   pinMode(BarrierEN, OUTPUT);
   pinMode(BarrierL, INPUT);
   pinMode(BarrierR, INPUT);
-  
+
   // Communication test. We'll read from two registers with different
   // default values to verify communication.
   uint8_t testRegisters = readByte(REG_INTERRUPT_MASK); // This should return 0xFF, Interrupt mask register address 0x09
@@ -686,20 +679,28 @@ void ValonI3::setMotor(int mLSpeed, int mRSpeed) {
 }
 
 /*
+  使能壁障传感器
+*/
+void ValonI3::EnBarrier() {
+    digitalWrite(BarrierEN, HIGH);
+}
+
+/*
+  禁用壁障传感器 
+*/
+void ValonI3::DisBarrier() {
+    digitalWrite(BarrierEN, LOW);
+}
+
+/*
   读取红外壁障传感器
+  返回值：0 - 1
 */
 int ValonI3::readBarrier(int pin) {
     // 参数有效性校验
-    if (pin != BarrierL || pin != BarrierR) { // 假设GPIO引脚编号在0到100之间是有效的
+    if (pin != BarrierL && pin != BarrierR) { // 假设GPIO引脚编号 BarrierL 或者 BarrierR 是有效的
         return -1; // 返回-1表示参数无效
     }
     int sensorValue = digitalRead(pin);
     return sensorValue;
-}
-
-/*
-  使能壁障传感器
-*/
-void ValonI3::EnBarrier(int en) {
-    digitalWrite(BarrierEN, en);
 }

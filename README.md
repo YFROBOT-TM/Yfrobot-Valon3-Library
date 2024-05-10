@@ -13,21 +13,30 @@ YFROBOT Motor Driver Library for VALON-I3
 
 创建对象：
 
-`MotorDriver motorDirver = MotorDriver(YF_VALON);`
+`ValonI3 valoni3;`
 
 Methods：
 
-设置电机方向，参数：1-默认，-1-反向 (可选，不使用该函数，电机方向默认)
+初始化
 
-`motorDirver.motorConfig(1, 1);// 左右电机默认方向`
+`valoni3.begin(VALONI3_ADDRESS) `
 
-`motorDirver.motorConfig(1); // 所有电机默认方向`
+使能红外壁障
+
+`valoni3.EnBarrier();  // 使能红外壁障传感器`
+
+禁用红外壁障
+
+`valoni3.DisBarrier();  // 禁用红外壁障传感器`
+
 
 驱动电机，参数：电机速度 -255 ~ 255
 
-`motorDirver.setMotor(255, 128);  // 左电机全速正转,右电机 50%速度正转`
+`valoni3.setMotor(0, 0);`
 
-`motorDirver.setMotor(0, 0);  // 左右电机停止`
+读取红外壁障传感器，参数：BarrierL、BarrierR
+
+`valoni3.readBarrier(BarrierR)`
 
 
 #### 库版本说明：
