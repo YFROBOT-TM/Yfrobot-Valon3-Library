@@ -8,6 +8,13 @@
 #include <Arduino.h>
 #include <ValonI3.h>
 
+volatile int16_t ValonI3::countLeft = 0;  // 初始化左电机脉冲计数为0
+volatile int16_t ValonI3::countRight = 0;  // 初始化左电机脉冲计数为0
+static bool ValonI3::lastLeftA = false;
+static bool ValonI3::lastLeftB = false;
+static bool ValonI3::lastRightA = false;
+static bool ValonI3::lastRightB = false;
+
 ValonI3::ValonI3()
 {
   _clkX = 0;
@@ -15,22 +22,32 @@ ValonI3::ValonI3()
 
 ValonI3::ValonI3(uint8_t address, uint8_t resetPin, uint8_t interruptPin, uint8_t oscillatorPin)
 {
-  // Store the received parameters into member variables
-  deviceAddress = address;
-  pinInterrupt = interruptPin;
-  pinOscillator = oscillatorPin;
-  pinReset = resetPin;
+    // Store the received parameters into member variables
+    deviceAddress = address;
+    pinInterrupt = interruptPin;
+    pinOscillator = oscillatorPin;
+    pinReset = resetPin;
+
+    // 注册中断服务例程
+    ::attachInterrupt(digitalPinToInterrupt(EncoderLXOR), leftISR, CHANGE);
+    ::attachInterrupt(digitalPinToInterrupt(EncoderRXOR), rightISR, CHANGE);
+}
+
+// 在类的析构函数中清除中断服务例程
+ValonI3::~ValonI3() {
+    // 清除中断服务例程
+    ::detachInterrupt(digitalPinToInterrupt(EncoderLXOR));
+    ::detachInterrupt(digitalPinToInterrupt(EncoderRXOR));
 }
 
 uint8_t ValonI3::begin(uint8_t address, TwoWire &wirePort, uint8_t resetPin)
 {
+    // Store the received parameters into member variables
+    _i2cPort = &wirePort;
+    deviceAddress = address;
+    pinReset = resetPin;
 
-  // Store the received parameters into member variables
-  _i2cPort = &wirePort;
-  deviceAddress = address;
-  pinReset = resetPin;
-
-  return init();
+    return init();
 }
 
 uint8_t ValonI3::init(void)
@@ -703,4 +720,60 @@ int ValonI3::readBarrier(int pin) {
     }
     int sensorValue = digitalRead(pin);
     return sensorValue;
+}
+
+
+
+void ValonI3::leftISR() {
+  bool newLeftB = ::digitalRead(EncoderLB);
+  bool newLeftA = ::digitalRead(EncoderLXOR) ^ newLeftB;
+  countLeft += (lastLeftA ^ newLeftB) - (newLeftA ^ lastLeftB);
+  if ((lastLeftA ^ newLeftA) & (lastLeftB ^ newLeftB)) {
+    errorLeft = true;
+  }
+  lastLeftA = newLeftA;
+  lastLeftB = newLeftB;
+}
+
+void ValonI3::rightISR() {
+  bool newRightB = ::digitalRead(EncoderRB);
+  bool newRightA = ::digitalRead(EncoderRXOR) ^ newRightB;
+  countRight += (lastRightA ^ newRightB) - (newRightA ^ lastRightB);
+  if ((lastRightA ^ newRightA) & (lastRightB ^ newRightB)) {
+    errorRight = true;
+  }
+  lastRightA = newRightA;
+  lastRightB = newRightB;
+}
+
+// 获取编码器计数的函数
+int16_t ValonI3::getCountsLeft() {
+  return countLeft;
+}
+int16_t ValonI3::getCountsRight() {
+  return countRight;
+}
+
+// 获取和重置编码器计数的函数
+int16_t ValonI3::getCountsAndResetLeft() {
+  int16_t counts = countLeft;
+  countLeft = 0;
+  return counts;
+}
+int16_t ValonI3::getCountsAndResetRight() {
+  int16_t counts = countRight;
+  countRight = 0;
+  return counts;
+}
+
+// 检查错误的函数
+bool ValonI3::checkErrorLeft() {
+  bool error = errorLeft;
+  errorLeft = 0;
+  return error;
+}
+bool ValonI3::checkErrorRight() {
+  bool error = errorRight;
+  errorRight = 0;
+  return error;
 }

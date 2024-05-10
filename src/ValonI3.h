@@ -91,7 +91,14 @@ Creation Date: 01-18-2022
 #define BarrierR 5
 #define BarrierEN 7
 
+// Arduino PIN NUM
+#define EncoderLXOR 2  // 连接到中断引脚,该引脚信号来自于 AB相异或
+#define EncoderLB A2
+#define EncoderRXOR 3  // 连接到中断引脚,该引脚信号来自于 AB相异或
+#define EncoderRB A3
+
 class ValonI3 {
+
 private: 
     byte REG_I_ON[8] = {REG_I_ON_0, REG_I_ON_1, REG_I_ON_2, REG_I_ON_3,
             REG_I_ON_4, REG_I_ON_5, REG_I_ON_6, REG_I_ON_7};
@@ -141,12 +148,25 @@ private:
 	// register, given the number of milliseconds and LED clock frequency.
 	uint8_t calculateSlopeRegister(uint8_t ms, uint8_t onIntensity, uint8_t offIntensity);
 
+    /* 测速相关 */
+    static volatile int16_t countLeft;   // 左电机脉冲计数
+    static volatile int16_t countRight;  // 右电机脉冲计数
+    static volatile bool errorLeft;      // 左编码器错误标志
+    static volatile bool errorRight;     // 右编码器错误标志
+
+    static bool lastLeftA;
+    static bool lastLeftB;
+    static bool lastRightA;
+    static bool lastRightB;
+
 public:
 	// -----------------------------------------------------------------------------
 	// Constructor - ValonI3: This function sets up the pins connected to the
 	//		ValonI3, and sets up the private deviceAddress variable.
 	// -----------------------------------------------------------------------------
 	ValonI3();
+
+    ~ValonI3();
 	// Legacy below. Use 0-parameter constructor, and set these parameters in the
 	// begin function:
 	ValonI3(uint8_t address, uint8_t resetPin = 255, uint8_t interruptPin = 255, uint8_t oscillatorPin = 255);
@@ -451,6 +471,17 @@ public:
     void EnBarrier();  // 使能障碍物检测
     void DisBarrier();  // 禁用障碍物检测
     int readBarrier(int pin);
+
+    /* 测速相关 */
+    int16_t getCountsLeft();            // 获取左侧编码器计数
+    int16_t getCountsRight();           // 获取右侧编码器计数
+    int16_t getCountsAndResetLeft();     // 获取并重置左侧编码器计数
+    int16_t getCountsAndResetRight();    // 获取并重置右侧编码器计数
+    bool checkErrorLeft();              // 检查左侧编码器错误
+    bool checkErrorRight();             // 检查右侧编码器错误
+
+    static void leftISR();  // 声明左编码器中断服务例程
+    static void rightISR(); // 声明右编码器中断服务例程
 };
 
 #endif // ValonI3_library_H
