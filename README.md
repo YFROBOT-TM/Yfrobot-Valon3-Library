@@ -11,8 +11,6 @@ YFROBOT Motor Driver Library for VALON-I3
 
 #### Valon-I 使用说明：
 
-适用对象：[VALON-I](https://item.taobao.com/item.htm?id=623336047525)
-
 创建对象：
 
 `MotorDriver motorDirver = MotorDriver(YF_VALON);`
