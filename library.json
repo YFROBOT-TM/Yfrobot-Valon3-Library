@@ -1,11 +1,11 @@
 {
-    "name": "Yfrobot Motor Driver Library",
-    "keywords": "yfrobot, motor, driver, function",
-    "description": "Library that makes Yfrobot Motor Driver work easy to use.",
+    "name": "Yfrobot VALON-I3_Arduino Library",
+    "keywords": "yfrobot, valon, motor, driver",
+    "description": "Library that makes Yfrobot VALON-I3_Arduino work easy to use.",
     "repository":
     {
         "type": "git",
-        "url": "https://github.com/YFROBOT-TM/Yfrobot-Motor-Driver-Library.git"
+        "url": "https://github.com/YFROBOT-TM/Yfrobot-Valon3-Library.git"
     },
     "frameworks": "arduino",
     "platforms": [

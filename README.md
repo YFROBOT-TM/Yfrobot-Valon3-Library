@@ -1,16 +1,14 @@
-# Yfrobot-Motor-Driver-Library
-YFROBOT Motor Driver Library for Arduino
-可用模块：
-L298P / PM-R3 / MD01 / MD02 / MD03 / MD04 / MD_GB36 / IIC_MOTORDRIVER / IIC_MOTORDRIVER_RZ7889
-小车套件：
-VALON / 4WD Mecanum Wheel 
+# Yfrobot-VALON-I3-Library
+YFROBOT Motor Driver Library for VALON-I3
+适配VALON-I3小车套件：VALON-I3_Arduino
+
+![](./assets/YF_VALONI3.jpg)
 
 调用库：
-
 `#include <MotorDriver.h>   // 包含头文件`
 #### MotorDriver_IIC V2 RZ7889 使用说明：
 
-适用对象：[Motor Driver iic](https://item.taobao.com/item.htm?id=626324653253)、[Motor Driver iic模块简介](http://www.yfrobot.com.cn/wiki/index.php?title=MotorDriver_IIC)
+适用对象：[VALON-I3](https://item.taobao.com/item.htm?id=622871845399)、[VALON-I3简介](http://www.yfrobot.com.cn/wiki/index.php?title=Arduino_Valon-I3)
 
 创建对象：
 
