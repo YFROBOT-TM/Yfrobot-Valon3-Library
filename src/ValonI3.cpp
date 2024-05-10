@@ -31,6 +31,7 @@ ValonI3::ValonI3(uint8_t address, uint8_t resetPin, uint8_t interruptPin, uint8_
 
 uint8_t ValonI3::begin(uint8_t address, TwoWire &wirePort, uint8_t resetPin)
 {
+
   // Store the received parameters into member variables
   _i2cPort = &wirePort;
   deviceAddress = address;
@@ -41,7 +42,7 @@ uint8_t ValonI3::begin(uint8_t address, TwoWire &wirePort, uint8_t resetPin)
 
 uint8_t ValonI3::init(void)
 {
-    
+  
   // Begin I2C should be done externally, before beginning ValonI3
   Wire.begin();
 
@@ -51,6 +52,17 @@ uint8_t ValonI3::init(void)
   else
     reset(0);
 
+  // 电机驱动引脚配置
+  pinMode(MLPinA, ANALOG_OUTPUT);
+  pinMode(MLPinB, ANALOG_OUTPUT);
+  pinMode(MRPinA, ANALOG_OUTPUT);
+  pinMode(MRPinB, ANALOG_OUTPUT);
+
+  // 2路壁障及使能引脚配置
+  pinMode(BarrierEN, OUTPUT);
+  pinMode(BarrierL, INPUT);
+  pinMode(BarrierR, INPUT);
+  
   // Communication test. We'll read from two registers with different
   // default values to verify communication.
   uint8_t testRegisters = readByte(REG_INTERRUPT_MASK); // This should return 0xFF, Interrupt mask register address 0x09
@@ -644,4 +656,50 @@ bool ValonI3::writeBytes(uint8_t firstRegisterAddress, uint8_t *writeArray, uint
   result = _i2cPort->write(writeArray, length);
   uint8_t endResult = _i2cPort->endTransmission();
   return result && (endResult == I2C_ERROR_OK);
+}
+
+/*
+  IIC 驱动电机函数 8837
+  参数：mLSpeed - 1电机速度 mRSpeed - 2电机速度(取值范围：-255 ~ 255)
+*/
+void ValonI3::setMotor(int mLSpeed, int mRSpeed) {
+    if (mLSpeed > 0) {
+        analogWrite(MLPinB, mLSpeed);
+        analogWrite(MLPinA, 0);
+    } else if (mLSpeed < 0) {
+        analogWrite(MLPinA, abs(mLSpeed));
+        analogWrite(MLPinB, 0);
+    } else {
+        analogWrite(MLPinA, 255);
+        analogWrite(MLPinB, 255);
+    }
+    if (mRSpeed > 0) {
+        analogWrite(MRPinB, mRSpeed);
+        analogWrite(MRPinA, 0);
+    } else if (mRSpeed < 0) {
+        analogWrite(MRPinA, abs(mRSpeed));
+        analogWrite(MRPinB, 0);
+    } else {
+        analogWrite(MRPinA, 255);
+        analogWrite(MRPinB, 255);
+    }
+}
+
+/*
+  读取红外壁障传感器
+*/
+int ValonI3::readBarrier(int pin) {
+    // 参数有效性校验
+    if (pin != BarrierL || pin != BarrierR) { // 假设GPIO引脚编号在0到100之间是有效的
+        return -1; // 返回-1表示参数无效
+    }
+    int sensorValue = digitalRead(pin);
+    return sensorValue;
+}
+
+/*
+  使能壁障传感器
+*/
+void ValonI3::EnBarrier(int en) {
+    digitalWrite(BarrierEN, en);
 }

@@ -90,6 +90,15 @@ Distributed as-is; no warranty is given.
 
 #define VALON_SX1508_ADDRESS  0x20  // SX1508 I2C address
 
+#define MLPinA 0
+#define MLPinB 1
+#define MRPinA 2
+#define MRPinB 3
+
+#define BarrierL 4
+#define BarrierR 5
+#define BarrierEN 7
+
 class ValonI3 {
 private: 
     byte REG_I_ON[8] = {REG_I_ON_0, REG_I_ON_1, REG_I_ON_2, REG_I_ON_3,
@@ -445,6 +454,10 @@ public:
 	//
 	// -----------------------------------------------------------------------------
 	void clock(uint8_t oscSource = 2, uint8_t oscDivider = 1, uint8_t oscPinFunction = 0, uint8_t oscFreqOut = 0);
+    
+    void setMotor(int mLSpeed, int mRSpeed); // 驱动电机
+    void EnBarrier(int en);  // 使能障碍物检测
+    int readBarrier(int pin);
 };
 
 #endif // ValonI3_SX1508_library_H
