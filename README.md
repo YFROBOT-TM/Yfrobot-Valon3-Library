@@ -1,14 +1,18 @@
 # Yfrobot-VALON-I3-Library
 YFROBOT Motor Driver Library for VALON-I3
+
 适配VALON-I3小车套件：VALON-I3_Arduino
+
+适用对象：[VALON-I3](https://item.taobao.com/item.htm?id=622871845399)、[VALON-I3简介](http://www.yfrobot.com.cn/wiki/index.php?title=Arduino_Valon-I3)
+
 
 ![](./assets/YF_VALONI3.jpg)
 
-调用库：
-`#include <MotorDriver.h>   // 包含头文件`
 #### MotorDriver_IIC V2 RZ7889 使用说明：
 
-适用对象：[VALON-I3](https://item.taobao.com/item.htm?id=622871845399)、[VALON-I3简介](http://www.yfrobot.com.cn/wiki/index.php?title=Arduino_Valon-I3)
+
+调用库：
+`#include <MotorDriver.h>   // 包含头文件`
 
 创建对象：
 
