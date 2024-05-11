@@ -153,7 +153,6 @@ private:
     static volatile int16_t countRight;  // 右电机脉冲计数
     static volatile bool errorLeft;      // 左编码器错误标志
     static volatile bool errorRight;     // 右编码器错误标志
-
     static bool lastLeftA;
     static bool lastLeftB;
     static bool lastRightA;
@@ -473,15 +472,18 @@ public:
     int readBarrier(int pin);
 
     /* 测速相关 */
+    static void leftISR();              // 声明左编码器中断服务函数
+    static void rightISR();             // 声明右编码器中断服务函数
+    void startISR();                    // 开启中断服务
+    void stopISR();                     // 停用中断服务
+
     int16_t getCountsLeft();            // 获取左侧编码器计数
     int16_t getCountsRight();           // 获取右侧编码器计数
-    int16_t getCountsAndResetLeft();     // 获取并重置左侧编码器计数
-    int16_t getCountsAndResetRight();    // 获取并重置右侧编码器计数
+    int16_t getCountsAndResetLeft();    // 获取并重置左侧编码器计数
+    int16_t getCountsAndResetRight();   // 获取并重置右侧编码器计数
     bool checkErrorLeft();              // 检查左侧编码器错误
     bool checkErrorRight();             // 检查右侧编码器错误
 
-    static void leftISR();  // 声明左编码器中断服务例程
-    static void rightISR(); // 声明右编码器中断服务例程
 };
 
 #endif // ValonI3_library_H

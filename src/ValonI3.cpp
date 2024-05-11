@@ -14,6 +14,9 @@ static bool ValonI3::lastLeftA = false;
 static bool ValonI3::lastLeftB = false;
 static bool ValonI3::lastRightA = false;
 static bool ValonI3::lastRightB = false;
+// Define static member variables
+volatile bool ValonI3::errorLeft = false;
+volatile bool ValonI3::errorRight = false;
 
 ValonI3::ValonI3()
 {
@@ -27,15 +30,11 @@ ValonI3::ValonI3(uint8_t address, uint8_t resetPin, uint8_t interruptPin, uint8_
     pinInterrupt = interruptPin;
     pinOscillator = oscillatorPin;
     pinReset = resetPin;
-
-    // 注册中断服务例程
-    ::attachInterrupt(digitalPinToInterrupt(EncoderLXOR), leftISR, CHANGE);
-    ::attachInterrupt(digitalPinToInterrupt(EncoderRXOR), rightISR, CHANGE);
 }
 
 // 在类的析构函数中清除中断服务例程
 ValonI3::~ValonI3() {
-    // 清除中断服务例程
+    // 清除中断服务
     ::detachInterrupt(digitalPinToInterrupt(EncoderLXOR));
     ::detachInterrupt(digitalPinToInterrupt(EncoderRXOR));
 }
@@ -52,40 +51,46 @@ uint8_t ValonI3::begin(uint8_t address, TwoWire &wirePort, uint8_t resetPin)
 
 uint8_t ValonI3::init(void)
 {
-  
-  // Begin I2C should be done externally, before beginning ValonI3
-  Wire.begin();
+    
+    // Begin I2C should be done externally, before beginning ValonI3
+    Wire.begin();
 
-  // If the reset pin is connected
-  if (pinReset != 255)
-    reset(1);
-  else
-    reset(0);
+    // 配置中断引脚 （:: 识别为arduino 专用函数，防止与库中函数冲突）
+    ::pinMode(EncoderLB, INPUT_PULLUP);
+    ::pinMode(EncoderLXOR, INPUT_PULLUP);
+    ::pinMode(EncoderRB, INPUT_PULLUP);
+    ::pinMode(EncoderRXOR, INPUT_PULLUP);
 
-  // 电机驱动引脚配置
-  pinMode(MLPinA, ANALOG_OUTPUT);
-  pinMode(MLPinB, ANALOG_OUTPUT);
-  pinMode(MRPinA, ANALOG_OUTPUT);
-  pinMode(MRPinB, ANALOG_OUTPUT);
+    // If the reset pin is connected
+    if (pinReset != 255)
+        reset(1);
+    else
+        reset(0);
 
-  // 2路壁障及使能引脚配置
-  pinMode(BarrierEN, OUTPUT);
-  pinMode(BarrierL, INPUT);
-  pinMode(BarrierR, INPUT);
+    // 电机驱动引脚配置
+    pinMode(MLPinA, ANALOG_OUTPUT);
+    pinMode(MLPinB, ANALOG_OUTPUT);
+    pinMode(MRPinA, ANALOG_OUTPUT);
+    pinMode(MRPinB, ANALOG_OUTPUT);
 
-  // Communication test. We'll read from two registers with different
-  // default values to verify communication.
-  uint8_t testRegisters = readByte(REG_INTERRUPT_MASK); // This should return 0xFF, Interrupt mask register address 0x09
+    // 2路壁障及使能引脚配置
+    pinMode(BarrierEN, OUTPUT);
+    pinMode(BarrierL, INPUT);
+    pinMode(BarrierR, INPUT);
 
-  if (testRegisters == 0xFF)
-  {
-    // Set the clock to a default of 2MHz using internal
-    clock(INTERNAL_CLOCK_2MHZ);
+    // Communication test. We'll read from two registers with different
+    // default values to verify communication.
+    uint8_t testRegisters = readByte(REG_INTERRUPT_MASK); // This should return 0xFF, Interrupt mask register address 0x09
 
-    return 1;
-  }
+    if (testRegisters == 0xFF)
+    {
+        // Set the clock to a default of 2MHz using internal
+        clock(INTERNAL_CLOCK_2MHZ);
 
-  return 0;
+        return 1;
+    }
+
+    return 0;
 }
 
 void ValonI3::reset(bool hardware)
@@ -669,8 +674,8 @@ bool ValonI3::writeBytes(uint8_t firstRegisterAddress, uint8_t *writeArray, uint
 }
 
 /*
-  IIC 驱动电机函数 8837
-  参数：mLSpeed - 1电机速度 mRSpeed - 2电机速度(取值范围：-255 ~ 255)
+    IIC 驱动电机函数 8837
+    参数：mLSpeed - 1电机速度 mRSpeed - 2电机速度(取值范围：-255 ~ 255)
 */
 void ValonI3::setMotor(int mLSpeed, int mRSpeed) {
     if (mLSpeed > 0) {
@@ -696,22 +701,22 @@ void ValonI3::setMotor(int mLSpeed, int mRSpeed) {
 }
 
 /*
-  使能壁障传感器
+    使能壁障传感器
 */
 void ValonI3::EnBarrier() {
     digitalWrite(BarrierEN, HIGH);
 }
 
 /*
-  禁用壁障传感器 
+    禁用壁障传感器    
 */
 void ValonI3::DisBarrier() {
     digitalWrite(BarrierEN, LOW);
 }
 
 /*
-  读取红外壁障传感器
-  返回值：0 - 1
+    读取红外壁障传感器
+    返回值：0 - 1
 */
 int ValonI3::readBarrier(int pin) {
     // 参数有效性校验
@@ -722,7 +727,28 @@ int ValonI3::readBarrier(int pin) {
     return sensorValue;
 }
 
-
+/*
+    启动中断服务函数
+    mode: defines when the interrupt should be triggered. Four constants are predefined as valid values:
+    - LOW to trigger the interrupt whenever the pin is low,
+    - CHANGE to trigger the interrupt whenever the pin changes value
+    - RISING to trigger when the pin goes from low to high,
+    - FALLING for when the pin goes from high to low.
+    The Due board allows also:
+    - HIGH to trigger the interrupt whenever the pin is high.
+*/
+void ValonI3::startISR() {
+    // 配置中断函数 注册中断服务例程
+    ::attachInterrupt(digitalPinToInterrupt(EncoderLXOR), leftISR, CHANGE);
+    ::attachInterrupt(digitalPinToInterrupt(EncoderRXOR), rightISR, CHANGE);
+}
+/* 关闭中断服务函数
+*/
+void ValonI3::stopISR() {
+    // 移除中断函数
+    ::detachInterrupt(digitalPinToInterrupt(EncoderLXOR));
+    ::detachInterrupt(digitalPinToInterrupt(EncoderRXOR));
+}
 
 void ValonI3::leftISR() {
   bool newLeftB = ::digitalRead(EncoderLB);

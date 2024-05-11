@@ -16,6 +16,14 @@ analogWrite	KEYWORD2
 EnBarrier	KEYWORD2
 DisBarrier	KEYWORD2
 readBarrier	KEYWORD2
+getCountsLeft	KEYWORD2
+getCountsRight	KEYWORD2
+getCountsAndResetLeft	KEYWORD2
+getCountsAndResetRight	KEYWORD2
+checkErrorLeft	KEYWORD2
+checkErrorRight	KEYWORD2
+startISR	KEYWORD2
+stopISR	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
